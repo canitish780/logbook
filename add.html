@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logbook of Nitish Agrawal — Add task</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  --paper: #e7dfc9; --card: #f6f1e4; --card-hi: #fbf8ef;
+  --ink: #26302a; --ink-soft: #5b6259; --ink-faint: #8a9184;
+  --line: #c9bea0; --accent: #3e6b5c; --accent-hi: #4d8371;
+  --warm: #bd6b34; --done: #8b9b7e; --danger: #a8462f;
+  --radius: 3px; --shadow: 0 1px 0 rgba(38,48,42,0.06), 0 2px 8px rgba(38,48,42,0.06);
+}
+* { box-sizing: border-box; }
+html, body { margin:0; padding:0; background: var(--paper);
+  background-image: radial-gradient(rgba(38,48,42,0.035) 1px, transparent 1px);
+  background-size: 3px 3px; color: var(--ink); font-family:'Inter',-apple-system,sans-serif; min-height:100vh; }
+a { color: inherit; }
+.wrap { max-width:780px; margin:0 auto; padding:0 20px 40px; }
+.site-header { display:flex; align-items:baseline; justify-content:space-between; padding:28px 0 18px;
+  border-bottom:2px solid var(--ink); margin-bottom:22px; flex-wrap:wrap; gap:10px; }
+.brand { display:flex; align-items:baseline; gap:10px; }
+.brand-mark { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.12em;
+  background:var(--ink); color:var(--paper); padding:3px 6px; border-radius:2px; transform:rotate(-2deg); }
+.brand h1 { font-family:'Fraunces',serif; font-weight:700; font-size:24px; margin:0; letter-spacing:-0.01em; }
+nav.site-nav { display:flex; gap:4px; align-items:center; font-family:'JetBrains Mono',monospace; font-size:12.5px; flex-wrap:wrap; }
+nav.site-nav a, nav.site-nav button { text-decoration:none; color:var(--ink-soft); padding:7px 12px;
+  border:1px solid transparent; border-radius:var(--radius); background:none; cursor:pointer; font-family:inherit; font-size:inherit; }
+nav.site-nav a.active, nav.site-nav a:hover, nav.site-nav button:hover { border-color:var(--line); color:var(--ink); background:var(--card); }
+select, input[type=text], input[type=url], input[type=date], textarea { font-family:'Inter',sans-serif; font-size:14px; padding:9px 11px;
+  border-radius:var(--radius); border:1px solid var(--line); background:var(--card-hi); color:var(--ink); }
+select:focus, input:focus, textarea:focus, button:focus-visible { outline:2px solid var(--accent-hi); outline-offset:1px; }
+.btn-primary { background:var(--ink); color:var(--paper); border:none; padding:12px 20px; border-radius:var(--radius);
+  font-family:'JetBrains Mono',monospace; font-size:13px; letter-spacing:0.04em; cursor:pointer; }
+.btn-primary:hover { background:var(--accent); }
+.btn-primary:disabled { opacity:0.5; cursor:default; }
+.btn-secondary { background:none; border:1px solid var(--line); color:var(--ink-soft); padding:11px 16px;
+  border-radius:var(--radius); font-family:'JetBrains Mono',monospace; font-size:13px; cursor:pointer; }
+.btn-secondary:hover { border-color:var(--ink); color:var(--ink); }
+.link-btn { background:none; border:none; color:var(--accent); font-family:'JetBrains Mono',monospace; font-size:12px;
+  cursor:pointer; padding:6px 0; text-decoration:underline; }
+.toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink);
+  color:var(--paper); padding:11px 18px; border-radius:var(--radius); font-family:'JetBrains Mono',monospace;
+  font-size:12.5px; opacity:0; pointer-events:none; transition:all 0.25s ease; z-index:100; max-width:90vw; }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+.toast.error { background:var(--danger); }
+.modal-backdrop { position:fixed; inset:0; background:rgba(38,48,42,0.45); display:none; align-items:flex-start;
+  justify-content:center; padding:8vh 16px; z-index:200; overflow-y:auto; }
+.modal-backdrop.open { display:flex; }
+.modal { background:var(--card-hi); border-radius:var(--radius); max-width:440px; width:100%; padding:26px 24px;
+  box-shadow:0 10px 40px rgba(0,0,0,0.25); position:relative; }
+.modal h2 { font-family:'Fraunces',serif; font-size:20px; margin:0 0 6px; }
+.modal p.sub { font-size:12.5px; color:var(--ink-soft); margin:0 0 20px; line-height:1.5; }
+.modal .field { margin-bottom:14px; }
+.field label { display:block; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.08em;
+  text-transform:uppercase; color:var(--ink-soft); margin-bottom:6px; }
+.field input, .field select, .field textarea { width:100%; }
+.field-row { display:flex; gap:14px; }
+.field-row .field { flex:1; }
+.hint { font-size:12px; color:var(--ink-faint); margin-top:5px; }
+.modal-actions { display:flex; justify-content:space-between; align-items:center; margin-top:20px; gap:10px; flex-wrap:wrap; }
+.status-line { font-family:'JetBrains Mono',monospace; font-size:12px; margin-top:12px; min-height:16px; }
+.status-line.ok { color:var(--accent); }
+.status-line.err { color:var(--danger); }
+.detail-close { background:none; border:none; font-size:20px; color:var(--ink-faint); cursor:pointer; position:absolute; top:16px; right:18px; }
+#advancedFields { border-top:1px dashed var(--line); margin-top:8px; padding-top:16px; display:none; }
+.card-form { background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:26px 24px;
+  box-shadow:var(--shadow); position:relative; }
+.card-form::before { content: attr(data-tag); position:absolute; top:-11px; left:20px; background:var(--ink); color:var(--paper);
+  font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.14em; padding:3px 8px; border-radius:2px; transform:rotate(-1.5deg); }
+.field { margin-bottom:18px; }
+.type-toggle { display:flex; gap:8px; margin-bottom:22px; }
+.type-toggle label { flex:1; text-align:center; border:1px solid var(--line); border-radius:var(--radius); padding:11px 6px;
+  cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--ink-soft); background:var(--card-hi); }
+.type-toggle input { display:none; }
+.type-toggle input:checked + span { color:var(--ink); font-weight:600; }
+.type-toggle label:has(input:checked) { border-color:var(--accent); background:#eef3ef; }
+.priority-toggle { display:flex; gap:8px; }
+.priority-toggle label { flex:1; text-align:center; border:1px solid var(--line); border-radius:var(--radius); padding:9px 6px;
+  cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink-soft); }
+.priority-toggle input { display:none; }
+.priority-toggle input:checked + span { color:var(--ink); font-weight:600; }
+.priority-toggle label:has(input:checked) { border-color:var(--accent); background:var(--card-hi); }
+.form-actions { display:flex; gap:10px; align-items:center; }
+.link-chip { display:inline-flex; align-items:center; gap:7px; background:var(--card-hi); border:1px solid var(--accent);
+  color:var(--accent); border-radius:20px; padding:5px 6px 5px 12px; font-family:'JetBrains Mono',monospace; font-size:12px;
+  margin:0 6px 6px 0; }
+.link-chip .remove-link { cursor:pointer; color:var(--danger); font-weight:bold; padding:0 4px; }
+.add-link-row { display:flex; gap:8px; margin-top:8px; }
+.add-link-row input { flex:1; }
+.site-footer { max-width:780px; margin:20px auto 0; padding:22px 20px 30px; text-align:center;
+  font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--ink-faint); border-top:1px solid var(--line); }
+@media (max-width:520px) { .field-row { flex-direction:column; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="brand"><span class="brand-mark">LOG</span><h1>Logbook of Nitish Agrawal</h1></div>
+    <nav class="site-nav">
+      <a href="index.html">Home</a>
+      <a href="add.html" class="active">Add task</a>
+      <a href="index.html">✓ Completed projects</a>
+      <button id="settingsBtn" title="Connect this device">⚙ Settings</button>
+    </nav>
+  </header>
+
+  <div class="type-toggle">
+    <label><input type="radio" name="entryType" value="task" checked><span>📋 Task</span></label>
+    <label><input type="radio" name="entryType" value="project"><span>📁 Project</span></label>
+  </div>
+
+  <form class="card-form" id="addForm" data-tag="NEW ENTRY">
+    <div class="field">
+      <label for="fTitle">Title</label>
+      <input type="text" id="fTitle" placeholder="e.g. Pick up passport photos" required>
+    </div>
+    <div class="field">
+      <label for="fNotes">Notes (optional)</label>
+      <textarea id="fNotes" rows="3" placeholder="Any detail worth remembering later"></textarea>
+    </div>
+
+    <div class="field-row">
+      <div class="field"><label for="fDate">Date</label><input type="date" id="fDate" required></div>
+      <div class="field"><label for="fPlace">Place (optional)</label>
+        <input type="text" id="fPlace" list="placeOptions" placeholder="e.g. Costco, Mom's house">
+        <datalist id="placeOptions"></datalist>
+      </div>
+    </div>
+
+    <div id="taskOnlyFields">
+      <div class="field">
+        <label>Priority</label>
+        <div class="priority-toggle">
+          <label><input type="radio" name="priority" value="normal" checked><span>Normal</span></label>
+          <label><input type="radio" name="priority" value="high"><span>High</span></label>
+        </div>
+      </div>
+    </div>
+
+    <div id="projectOnlyFields" style="display:none;">
+      <div class="field">
+        <label>Links (optional)</label>
+        <div id="newLinksList"></div>
+        <div class="add-link-row">
+          <input type="text" id="newLinkLabel" placeholder="Label (optional)">
+          <input type="url" id="newLinkUrl" placeholder="https://...">
+          <button type="button" class="btn-secondary" id="newLinkAdd">Add</button>
+        </div>
+        <p class="hint">Links you add here open in a new tab from the project's popup on the homepage.</p>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-primary" id="submitBtn">Add task</button>
+    </div>
+  </form>
+</div>
+
+<footer class="site-footer">Designed by and for Nitish Agrawal</footer>
+
+<script>
+/* ================= EDIT THIS ONE LINE ================= */
+const SHEETS_URL = 'PASTE_YOUR_APPS_SCRIPT_URL_HERE';
+/* ========================================================= */
+
+/* ---------- Config ---------- */
+const CFG_KEY = 'logbook_sheets_config';
+function getConfig(){ try{ return JSON.parse(localStorage.getItem(CFG_KEY))||{}; }catch(e){ return {}; } }
+function setConfig(cfg){ localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }
+function isConfigured(){ return !!getConfig().appKey; }
+function isDeployed(){ return SHEETS_URL && SHEETS_URL.indexOf('PASTE_YOUR') === -1; }
+
+/* ---------- passphrase encryption ---------- */
+const MIN_PASSPHRASE_LEN = 12;
+function bufToB64(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))); }
+function b64ToBuf(b64){ return Uint8Array.from(atob(b64), c=>c.charCodeAt(0)); }
+async function deriveAesKey(passphrase, saltBytes){
+  const keyMaterial = await crypto.subtle.importKey('raw', new TextEncoder().encode(passphrase), {name:'PBKDF2'}, false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name:'PBKDF2', salt: saltBytes, iterations: 150000, hash:'SHA-256' }, keyMaterial, { name:'AES-GCM', length:256 }, false, ['encrypt','decrypt']);
+}
+async function encryptConfig(obj, passphrase){
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await deriveAesKey(passphrase, salt);
+  const ct = await crypto.subtle.encrypt({name:'AES-GCM', iv}, key, new TextEncoder().encode(JSON.stringify(obj)));
+  return { v:1, salt:bufToB64(salt), iv:bufToB64(iv), ct:bufToB64(ct) };
+}
+async function decryptConfig(payload, passphrase){
+  const key = await deriveAesKey(passphrase, b64ToBuf(payload.salt));
+  try {
+    const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv:b64ToBuf(payload.iv)}, key, b64ToBuf(payload.ct));
+    return JSON.parse(new TextDecoder().decode(pt));
+  } catch(e) { throw new Error('Wrong passphrase.'); }
+}
+
+/* ---------- Google Sheets backend ---------- */
+async function apiGet(params){
+  const url = SHEETS_URL + '?' + new URLSearchParams(params).toString() + `&_=${Date.now()}`;
+  const res = await fetch(url, { cache:'no-store' });
+  const data = await res.json();
+  if (!data.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+async function apiPost(body){
+  const res = await fetch(SHEETS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(body) });
+  const data = await res.json();
+  if (!data.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+async function loadData(){
+  const c = getConfig();
+  const data = await apiGet({ action:'getData', key: c.appKey });
+  return { tasks: data.tasks || [], projects: data.projects || [] };
+}
+async function saveData(tasks, projects){
+  const c = getConfig();
+  await apiPost({ key: c.appKey, action:'saveAll', tasks, projects });
+}
+async function testConnection(appKey){ await apiGet({ action:'getData', key: appKey }); return true; }
+async function fetchSyncBlob(){
+  const data = await apiGet({ action:'getSyncBlob' });
+  if (!data.blob) throw new Error('No passphrase set up yet for this Logbook — use Advanced setup on a connected device first.');
+  return JSON.parse(data.blob);
+}
+async function saveSyncBlob(blobObj, appKey){ await apiPost({ key: appKey, action:'saveSyncBlob', blob: JSON.stringify(blobObj) }); }
+
+/* ---------- helpers ---------- */
+function escapeHtml(str){ const div=document.createElement('div'); div.textContent=str||''; return div.innerHTML; }
+function uid(){ return 't'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function showToast(msg, isError){
+  let el = document.getElementById('toast');
+  if (!el){ el=document.createElement('div'); el.id='toast'; el.className='toast'; document.body.appendChild(el); }
+  el.textContent = msg;
+  el.className = 'toast show' + (isError ? ' error' : '');
+  clearTimeout(el._timer);
+  el._timer = setTimeout(()=>el.classList.remove('show'), 3200);
+}
+
+/* ---------- settings modal ---------- */
+function injectSettingsModal(){
+  if (document.getElementById('settingsModal')) return;
+  const c = getConfig();
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = `
+  <div class="modal-backdrop" id="settingsModal">
+    <div class="modal">
+      <button class="detail-close" id="cfgCancel">✕</button>
+      <h2>Unlock this Logbook</h2>
+      <p class="sub">${isDeployed() ? 'Enter the passphrase to connect this device.' : '<strong>This deployment has not been connected to a Google Sheet yet.</strong> Edit the SHEETS_URL constant in index.html and add.html first, then use Advanced setup below.'}</p>
+      <div class="field"><label for="cfgPassphrase">Passphrase</label>
+        <input type="text" id="cfgPassphrase" placeholder="your passphrase" autocomplete="off" value="${escapeHtml(c.lastPassphrase||'')}"></div>
+      <div class="modal-actions">
+        <button class="link-btn" id="toggleAdvanced" type="button">Advanced setup</button>
+        <button class="btn-primary" id="cfgUnlock">Unlock</button>
+      </div>
+      <div class="status-line" id="cfgStatus"></div>
+
+      <div id="advancedFields">
+        <p class="sub" style="margin-top:0;">For first-time setup, or to fix a broken connection. The App key must match the SECRET constant in your Apps Script.</p>
+        <div class="field"><label for="cfgAppKey">App key</label>
+          <input type="text" id="cfgAppKey" placeholder="matches SECRET in Code.gs" autocomplete="off"></div>
+        <p class="hint">Entering a passphrase above and clicking Save &amp; test will encrypt this key and publish it (encrypted) to the sheet, so any device can unlock with just the passphrase from then on.</p>
+        <div class="modal-actions" style="justify-content:flex-end;">
+          <button class="btn-secondary" id="cfgSave">Save &amp; test</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+  document.body.appendChild(wrapper);
+  document.getElementById('cfgCancel').addEventListener('click', closeSettings);
+  document.getElementById('settingsModal').addEventListener('click', (e)=>{ if (e.target.id==='settingsModal') closeSettings(); });
+  document.getElementById('toggleAdvanced').addEventListener('click', ()=>{
+    const el = document.getElementById('advancedFields');
+    el.style.display = el.style.display==='none' || !el.style.display ? 'block' : 'none';
+  });
+
+  document.getElementById('cfgUnlock').addEventListener('click', async ()=>{
+    const passphrase = document.getElementById('cfgPassphrase').value;
+    const statusEl = document.getElementById('cfgStatus');
+    if (!isDeployed()){ statusEl.textContent='SHEETS_URL is not set yet — edit the file first.'; statusEl.className='status-line err'; return; }
+    if (!passphrase){ statusEl.textContent='Enter your passphrase.'; statusEl.className='status-line err'; return; }
+    statusEl.textContent='Fetching…'; statusEl.className='status-line';
+    try {
+      const blob = await fetchSyncBlob();
+      statusEl.textContent='Decrypting…';
+      const cfg = await decryptConfig(blob, passphrase);
+      cfg.lastPassphrase = passphrase;
+      statusEl.textContent='Testing connection…';
+      await testConnection(cfg.appKey);
+      setConfig(cfg);
+      statusEl.textContent='Unlocked. You can close this now.';
+      statusEl.className='status-line ok';
+      window.dispatchEvent(new CustomEvent('logbook:configured'));
+    } catch(err){ statusEl.textContent=err.message; statusEl.className='status-line err'; }
+  });
+
+  document.getElementById('cfgSave').addEventListener('click', async ()=>{
+    const appKey = document.getElementById('cfgAppKey').value.trim();
+    const passphrase = document.getElementById('cfgPassphrase').value;
+    const statusEl = document.getElementById('cfgStatus');
+    if (!isDeployed()){ statusEl.textContent='SHEETS_URL is not set yet — edit the file first.'; statusEl.className='status-line err'; return; }
+    if (!appKey){ statusEl.textContent='App key is required.'; statusEl.className='status-line err'; return; }
+    if (!passphrase || passphrase.length < MIN_PASSPHRASE_LEN){ statusEl.textContent=`Enter a passphrase of at least ${MIN_PASSPHRASE_LEN} characters.`; statusEl.className='status-line err'; return; }
+    statusEl.textContent='Testing connection…'; statusEl.className='status-line';
+    try {
+      await testConnection(appKey);
+      statusEl.textContent='Connected. Saving passphrase…';
+      const blob = await encryptConfig({ appKey }, passphrase);
+      await saveSyncBlob(blob, appKey);
+      setConfig({ appKey, lastPassphrase: passphrase });
+      statusEl.textContent='Set up complete. Other devices can now unlock with just this passphrase.';
+      statusEl.className='status-line ok';
+      window.dispatchEvent(new CustomEvent('logbook:configured'));
+    } catch(err){ statusEl.textContent=err.message; statusEl.className='status-line err'; }
+  });
+}
+function openSettings(){ injectSettingsModal(); document.getElementById('settingsModal').classList.add('open'); }
+function closeSettings(){ const m=document.getElementById('settingsModal'); if (m) m.classList.remove('open'); }
+
+/* ---------- add-page logic ---------- */
+let existingPlaces = [];
+let newLinks = [];
+
+async function initAddPage(){
+  if (!isConfigured()) return;
+  try {
+    const { tasks, projects } = await loadData();
+    existingPlaces = [...new Set(tasks.filter(t=>t.place).map(t=>t.place).concat(projects.filter(p=>p.place).map(p=>p.place)))].sort();
+    document.getElementById('placeOptions').innerHTML = existingPlaces.map(p=>`<option value="${escapeHtml(p)}">`).join('');
+  } catch(err) { /* non-fatal */ }
+}
+window.addEventListener('logbook:configured', initAddPage);
+
+function currentType(){ return document.querySelector('input[name="entryType"]:checked').value; }
+
+function updateFormForType(){
+  const type = currentType();
+  document.getElementById('taskOnlyFields').style.display = type==='task' ? '' : 'none';
+  document.getElementById('projectOnlyFields').style.display = type==='project' ? '' : 'none';
+  document.getElementById('addForm').setAttribute('data-tag', type==='task' ? 'NEW TASK' : 'NEW PROJECT');
+  document.getElementById('submitBtn').textContent = type==='task' ? 'Add task' : 'Add project';
+  document.getElementById('fTitle').placeholder = type==='task' ? 'e.g. Pick up passport photos' : 'e.g. Repaint the fence';
+}
+
+function renderNewLinks(){
+  const list = document.getElementById('newLinksList');
+  list.innerHTML = '';
+  newLinks.forEach((link, i) => {
+    const chip = document.createElement('span'); chip.className = 'link-chip';
+    const text = document.createElement('span'); text.textContent = link.label || link.url;
+    const rm = document.createElement('span'); rm.className='remove-link'; rm.textContent='✕';
+    rm.addEventListener('click', ()=>{ newLinks.splice(i,1); renderNewLinks(); });
+    chip.appendChild(text); chip.appendChild(rm);
+    list.appendChild(chip);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  injectSettingsModal();
+  document.getElementById('settingsBtn').addEventListener('click', openSettings);
+  if (!isConfigured()) setTimeout(openSettings, 300);
+  initAddPage();
+
+  const todayStr = new Date().toISOString().slice(0,10);
+  document.getElementById('fDate').value = todayStr;
+
+  document.querySelectorAll('input[name="entryType"]').forEach(r => r.addEventListener('change', updateFormForType));
+  updateFormForType();
+
+  document.getElementById('newLinkAdd').addEventListener('click', ()=>{
+    const url = document.getElementById('newLinkUrl').value.trim();
+    if (!url) return;
+    const label = document.getElementById('newLinkLabel').value.trim();
+    newLinks.push({ label, url });
+    document.getElementById('newLinkLabel').value = '';
+    document.getElementById('newLinkUrl').value = '';
+    renderNewLinks();
+  });
+
+  const form = document.getElementById('addForm');
+  form.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    if (!isConfigured()){ openSettings(); return; }
+    const type = currentType();
+    const title = document.getElementById('fTitle').value.trim();
+    const notes = document.getElementById('fNotes').value.trim();
+    const date = document.getElementById('fDate').value;
+    const place = document.getElementById('fPlace').value.trim() || null;
+    if (!title){ showToast('Give it a title.', true); return; }
+    if (!date){ showToast('Date is required.', true); return; }
+
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true; submitBtn.textContent = 'Saving…';
+
+    try {
+      const { tasks, projects } = await loadData();
+      if (type === 'task'){
+        const priority = document.querySelector('input[name="priority"]:checked').value;
+        tasks.push({ id: uid(), title, notes: notes||null, date, place, priority, completed:false,
+          createdAt: new Date().toISOString(), completedAt: null });
+        await saveData(tasks, projects);
+        showToast('Task added.');
+      } else {
+        projects.push({ id: uid(), title, notes: notes||null, date, place, links: newLinks, completed:false,
+          createdAt: new Date().toISOString(), completedAt: null });
+        await saveData(tasks, projects);
+        showToast('Project added.');
+      }
+      form.reset();
+      document.getElementById('fDate').value = todayStr;
+      document.querySelector('input[name="priority"][value="normal"]').checked = true;
+      document.querySelector('input[name="entryType"][value="task"]').checked = true;
+      newLinks = []; renderNewLinks();
+      updateFormForType();
+      initAddPage();
+    } catch(err) { showToast('Could not save: ' + err.message, true); }
+    finally { submitBtn.disabled = false; updateFormForType(); }
+  });
+});
+</script>
+</body>
+</html>
