@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logbook of Nitish Agrawal — Tasks</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  --paper: #e7dfc9; --card: #f6f1e4; --card-hi: #fbf8ef;
+  --ink: #26302a; --ink-soft: #5b6259; --ink-faint: #8a9184;
+  --line: #c9bea0; --accent: #3e6b5c; --accent-hi: #4d8371;
+  --warm: #bd6b34; --done: #8b9b7e; --danger: #a8462f;
+  --radius: 3px; --shadow: 0 1px 0 rgba(38,48,42,0.06), 0 2px 8px rgba(38,48,42,0.06);
+}
+* { box-sizing: border-box; }
+html, body { margin:0; padding:0; background: var(--paper);
+  background-image: radial-gradient(rgba(38,48,42,0.035) 1px, transparent 1px);
+  background-size: 3px 3px; color: var(--ink); font-family:'Inter',-apple-system,sans-serif; min-height:100vh; }
+a { color: inherit; }
+.wrap { max-width:780px; margin:0 auto; padding:0 20px 40px; }
+.site-header { display:flex; align-items:baseline; justify-content:space-between; padding:28px 0 18px;
+  border-bottom:2px solid var(--ink); margin-bottom:22px; flex-wrap:wrap; gap:10px; }
+.brand { display:flex; align-items:baseline; gap:10px; }
+.brand-mark { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.12em;
+  background:var(--ink); color:var(--paper); padding:3px 6px; border-radius:2px; transform:rotate(-2deg); }
+.brand h1 { font-family:'Fraunces',serif; font-weight:700; font-size:24px; margin:0; letter-spacing:-0.01em; }
+nav.site-nav { display:flex; gap:4px; align-items:center; font-family:'JetBrains Mono',monospace; font-size:12.5px; flex-wrap:wrap; }
+nav.site-nav a, nav.site-nav button { text-decoration:none; color:var(--ink-soft); padding:7px 12px;
+  border:1px solid transparent; border-radius:var(--radius); background:none; cursor:pointer; font-family:inherit; font-size:inherit; }
+nav.site-nav a.active, nav.site-nav a:hover, nav.site-nav button:hover { border-color:var(--line); color:var(--ink); background:var(--card); }
+
+.filter-bar { display:flex; flex-wrap:wrap; gap:8px 10px; align-items:center; margin-bottom:24px; }
+.pill-group { display:flex; gap:4px; background:var(--card); border:1px solid var(--line); border-radius:20px; padding:3px; }
+.pill-group .pill-btn { border:none; border-radius:16px; background:none; color:var(--ink-soft);
+  font-family:'JetBrains Mono',monospace; font-size:12px; padding:6px 12px; cursor:pointer; }
+.pill-group .pill-btn.active { background:var(--ink); color:var(--paper); }
+.filter-bar select { font-family:'JetBrains Mono',monospace; font-size:12px; padding:8px 10px; }
+.filter-bar input[type=date] { font-family:'JetBrains Mono',monospace; font-size:12px; padding:7px 10px; }
+.filter-bar #dateFilterClear { padding:7px 10px; }
+.filter-bar #searchInput { font-family:'Inter',sans-serif; font-size:13px; padding:8px 12px; min-width:180px; flex:1; }
+
+.sync-status { font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--ink-soft); margin:-8px 0 18px; display:block; }
+
+@keyframes skeleton-shimmer { 0%{background-position:-300px 0;} 100%{background-position:300px 0;} }
+.skeleton-card {
+  height:46px; border-radius:var(--radius); border:1px solid var(--line);
+  background:linear-gradient(90deg, var(--card) 20%, var(--card-hi) 40%, var(--card) 60%);
+  background-size:600px 100%; animation:skeleton-shimmer 1.3s ease-in-out infinite; margin-bottom:8px;
+}
+
+.section-label { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.14em; text-transform:uppercase;
+  color:var(--ink-faint); display:flex; align-items:center; gap:10px; margin:22px 0 10px; }
+.section-label::after { content:''; flex:1; height:1px; background:var(--line); }
+.section-label.warn { color:var(--danger); }
+.task-list { display:flex; flex-direction:column; gap:8px; }
+.task-card { display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--line);
+  border-radius:var(--radius); padding:11px 12px; box-shadow:var(--shadow); position:relative; cursor:pointer; }
+.task-card:hover { border-color:var(--accent); }
+.task-card.done { opacity:0.55; }
+.task-card.done .task-title { text-decoration:line-through; text-decoration-color:var(--done); }
+.check { width:20px; height:20px; flex-shrink:0; border:1.5px solid var(--ink-soft); border-radius:50%; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; background:var(--card-hi); }
+.check.checked { background:var(--done); border-color:var(--done); color:var(--card-hi); font-size:12px; }
+.task-body { flex:1; min-width:0; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.task-title { font-family:'Fraunces',serif; font-weight:600; font-size:15.5px; margin:0; }
+.task-meta { display:flex; gap:6px; flex-wrap:wrap; }
+.badge { font-family:'JetBrains Mono',monospace; font-size:10.5px; padding:2px 7px; border-radius:20px;
+  border:1px solid var(--line); color:var(--ink-soft); white-space:nowrap; }
+.badge.date { background:var(--ink); color:var(--paper); border-color:var(--ink); }
+.badge.date.overdue { background:var(--danger); border-color:var(--danger); }
+.badge.place { color:var(--accent); border-color:var(--accent); }
+.badge.priority { color:var(--warm); border-color:var(--warm); }
+.badge.project { color:#6a4f9e; border-color:#6a4f9e; }
+.task-del { background:none; border:none; color:var(--ink-faint); cursor:pointer; font-size:15px; padding:2px 4px; line-height:1; }
+.task-del:hover { color:var(--danger); }
+.empty-note { font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--ink-faint); padding:14px 2px; }
+
+select, input[type=text], input[type=url], input[type=date], textarea { font-family:'Inter',sans-serif; font-size:14px; padding:9px 11px;
+  border-radius:var(--radius); border:1px solid var(--line); background:var(--card-hi); color:var(--ink); }
+select:focus, input:focus, textarea:focus, button:focus-visible { outline:2px solid var(--accent-hi); outline-offset:1px; }
+.btn-primary { background:var(--ink); color:var(--paper); border:none; padding:12px 20px; border-radius:var(--radius);
+  font-family:'JetBrains Mono',monospace; font-size:13px; letter-spacing:0.04em; cursor:pointer; }
+.btn-primary:hover { background:var(--accent); }
+.btn-primary:disabled { opacity:0.5; cursor:default; }
+.btn-secondary { background:none; border:1px solid var(--line); color:var(--ink-soft); padding:11px 16px;
+  border-radius:var(--radius); font-family:'JetBrains Mono',monospace; font-size:13px; cursor:pointer; }
+.btn-secondary:hover { border-color:var(--ink); color:var(--ink); }
+.btn-danger { background:none; border:1px solid var(--danger); color:var(--danger); padding:11px 16px;
+  border-radius:var(--radius); font-family:'JetBrains Mono',monospace; font-size:13px; cursor:pointer; }
+.btn-danger:hover { background:var(--danger); color:var(--card-hi); }
+.link-btn { background:none; border:none; color:var(--accent); font-family:'JetBrains Mono',monospace; font-size:12px;
+  cursor:pointer; padding:6px 0; text-decoration:underline; }
+.toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink);
+  color:var(--paper); padding:11px 18px; border-radius:var(--radius); font-family:'JetBrains Mono',monospace;
+  font-size:12.5px; opacity:0; pointer-events:none; transition:all 0.25s ease; z-index:100; max-width:90vw; }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+.toast.error { background:var(--danger); }
+.modal-backdrop { position:fixed; inset:0; background:rgba(38,48,42,0.45); display:none; align-items:flex-start;
+  justify-content:center; padding:8vh 16px; z-index:200; overflow-y:auto; }
+.modal-backdrop.open { display:flex; }
+.modal { background:var(--card-hi); border-radius:var(--radius); max-width:440px; width:100%; padding:26px 24px;
+  box-shadow:0 10px 40px rgba(0,0,0,0.25); position:relative; }
+.modal.detail { max-width:540px; }
+.modal h2 { font-family:'Fraunces',serif; font-size:20px; margin:0 0 6px; }
+.modal p.sub { font-size:12.5px; color:var(--ink-soft); margin:0 0 20px; line-height:1.5; }
+.modal .field { margin-bottom:14px; }
+.field label { display:block; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.08em;
+  text-transform:uppercase; color:var(--ink-soft); margin-bottom:6px; }
+.field input, .field select, .field textarea { width:100%; }
+.field-row { display:flex; gap:14px; }
+.field-row .field { flex:1; }
+.hint { font-size:12px; color:var(--ink-faint); margin-top:5px; }
+.modal-actions { display:flex; justify-content:space-between; align-items:center; margin-top:20px; gap:10px; flex-wrap:wrap; }
+.status-line { font-family:'JetBrains Mono',monospace; font-size:12px; margin-top:12px; min-height:16px; }
+.status-line.ok { color:var(--accent); }
+.status-line.err { color:var(--danger); }
+.loading-note { font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--ink-faint); padding:30px 2px; text-align:center; }
+.detail-close { background:none; border:none; font-size:20px; color:var(--ink-faint); cursor:pointer; position:absolute; top:16px; right:18px; }
+.priority-toggle { display:flex; gap:8px; }
+.priority-toggle label { flex:1; text-align:center; border:1px solid var(--line); border-radius:var(--radius); padding:9px 6px;
+  cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink-soft); }
+.priority-toggle input { display:none; }
+.priority-toggle input:checked + span { color:var(--ink); font-weight:600; }
+.priority-toggle label:has(input:checked) { border-color:var(--accent); background:var(--card-hi); }
+.link-chip { display:inline-flex; align-items:center; gap:7px; background:var(--card); border:1px solid var(--accent);
+  color:var(--accent); border-radius:20px; padding:5px 6px 5px 12px; font-family:'JetBrains Mono',monospace; font-size:12px;
+  margin:0 6px 6px 0; }
+.link-chip .open-link { cursor:pointer; text-decoration:none; color:var(--accent); }
+.link-chip .remove-link { cursor:pointer; color:var(--danger); font-weight:bold; padding:0 4px; }
+.add-link-row { display:flex; gap:8px; margin-top:8px; }
+.add-link-row input { flex:1; }
+.detail-notes-view { font-size:14px; line-height:1.55; color:var(--ink); white-space:pre-wrap; margin:4px 0 0; }
+#detailViewLinks { display:flex; flex-wrap:wrap; margin-top:2px; }
+#detailViewLinks .link-chip { padding:6px 12px; }
+#advancedFields { border-top:1px dashed var(--line); margin-top:8px; padding-top:16px; display:none; }
+.site-footer { max-width:780px; margin:20px auto 0; padding:22px 20px 30px; text-align:center;
+  font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--ink-faint); border-top:1px solid var(--line); }
+@media (max-width:520px) { .field-row { flex-direction:column; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="brand"><span class="brand-mark">LOG</span><h1>Logbook of Nitish Agrawal</h1></div>
+    <nav class="site-nav">
+      <a href="index.html" class="active">Home</a>
+      <a href="add.html">Add task</a>
+      <button id="completedProjectsBtn">✓ Completed projects</button>
+      <button id="settingsBtn" title="Connect this device">⚙ Settings</button>
+    </nav>
+  </header>
+
+  <span class="sync-status" id="syncStatus"></span>
+
+  <div class="filter-bar">
+    <div class="pill-group" id="typeFilter">
+      <button class="pill-btn active" data-value="all" type="button">All</button>
+      <button class="pill-btn" data-value="task" type="button">Tasks</button>
+      <button class="pill-btn" data-value="project" type="button">Projects</button>
+    </div>
+    <div class="pill-group" id="statusFilter">
+      <button class="pill-btn active" data-value="active" type="button">Active</button>
+      <button class="pill-btn" data-value="completed" type="button">Completed</button>
+      <button class="pill-btn" data-value="allstatus" type="button">All</button>
+    </div>
+    <select id="placeFilterSelect"><option value="">All places</option></select>
+    <input type="date" id="dateFilterInput" title="Show only this date">
+    <button class="pill-btn" id="dateFilterClear" type="button" title="Clear date filter">✕</button>
+    <input type="text" id="searchInput" placeholder="🔍 Search title & notes…">
+  </div>
+
+  <div id="mainList" class="task-list"></div>
+</div>
+
+<footer class="site-footer">Designed by and for Nitish Agrawal</footer>
+
+<script>
+/* ================= EDIT THIS ONE LINE ================= */
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwWHGlIL4hMMY01X9tTDFSDZK8ErTL7LdivXshkY-wlwOyNY1X2GstffNqoHtHK4xk/exec';
+/* ========================================================= */
+
+/* ---------- Config ---------- */
+const CFG_KEY = 'logbook_sheets_config';
+function getConfig(){ try{ return JSON.parse(localStorage.getItem(CFG_KEY))||{}; }catch(e){ return {}; } }
+function setConfig(cfg){ localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }
+function isConfigured(){ return !!getConfig().appKey; }
+function isDeployed(){ return SHEETS_URL && SHEETS_URL.indexOf('PASTE_YOUR') === -1; }
+
+/* ---------- passphrase encryption (protects the App key, not the sheet URL) ---------- */
+const MIN_PASSPHRASE_LEN = 12;
+function bufToB64(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))); }
+function b64ToBuf(b64){ return Uint8Array.from(atob(b64), c=>c.charCodeAt(0)); }
+async function deriveAesKey(passphrase, saltBytes){
+  const keyMaterial = await crypto.subtle.importKey('raw', new TextEncoder().encode(passphrase), {name:'PBKDF2'}, false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name:'PBKDF2', salt: saltBytes, iterations: 150000, hash:'SHA-256' }, keyMaterial, { name:'AES-GCM', length:256 }, false, ['encrypt','decrypt']);
+}
+async function encryptConfig(obj, passphrase){
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await deriveAesKey(passphrase, salt);
+  const ct = await crypto.subtle.encrypt({name:'AES-GCM', iv}, key, new TextEncoder().encode(JSON.stringify(obj)));
+  return { v:1, salt:bufToB64(salt), iv:bufToB64(iv), ct:bufToB64(ct) };
+}
+async function decryptConfig(payload, passphrase){
+  const key = await deriveAesKey(passphrase, b64ToBuf(payload.salt));
+  try {
+    const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv:b64ToBuf(payload.iv)}, key, b64ToBuf(payload.ct));
+    return JSON.parse(new TextDecoder().decode(pt));
+  } catch(e) { throw new Error('Wrong passphrase.'); }
+}
+
+/* ---------- Google Sheets backend (via Apps Script) ---------- */
+async function apiGet(params){
+  const url = SHEETS_URL + '?' + new URLSearchParams(params).toString() + `&_=${Date.now()}`;
+  const res = await fetch(url, { cache:'no-store' });
+  const data = await res.json();
+  if (!data.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+async function apiPost(body){
+  const res = await fetch(SHEETS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(body) });
+  const data = await res.json();
+  if (!data.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+async function loadData(){
+  const c = getConfig();
+  const data = await apiGet({ action:'getData', key: c.appKey });
+  return { tasks: data.tasks || [], projects: data.projects || [] };
+}
+async function saveData(tasks, projects){
+  const c = getConfig();
+  await apiPost({ key: c.appKey, action:'saveAll', tasks, projects });
+}
+async function testConnection(appKey){
+  await apiGet({ action:'getData', key: appKey });
+  return true;
+}
+async function fetchSyncBlob(){
+  const data = await apiGet({ action:'getSyncBlob' });
+  if (!data.blob) throw new Error('No passphrase set up yet for this Logbook — use Advanced setup on a connected device first.');
+  return JSON.parse(data.blob);
+}
+async function saveSyncBlob(blobObj, appKey){
+  await apiPost({ key: appKey, action:'saveSyncBlob', blob: JSON.stringify(blobObj) });
+}
+
+/* ---------- date utils ---------- */
+function toISODate(d){ const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
+function todayISO(){ return toISODate(new Date()); }
+function addDays(d,n){ const date=new Date(d); date.setDate(date.getDate()+n); return date; }
+function formatDayLabel(iso){
+  const today = todayISO(); const tomorrow = toISODate(addDays(new Date(),1));
+  if (iso === today) return 'Today';
+  if (iso === tomorrow) return 'Tomorrow';
+  const d=new Date(iso+'T00:00:00'); return d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
+}
+function escapeHtml(str){ const div=document.createElement('div'); div.textContent=str||''; return div.innerHTML; }
+function uid(){ return 't'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+
+/* ---------- toast ---------- */
+function showToast(msg, isError){
+  let el = document.getElementById('toast');
+  if (!el){ el=document.createElement('div'); el.id='toast'; el.className='toast'; document.body.appendChild(el); }
+  el.textContent = msg;
+  el.className = 'toast show' + (isError ? ' error' : '');
+  clearTimeout(el._timer);
+  el._timer = setTimeout(()=>el.classList.remove('show'), 3200);
+}
+
+/* ---------- settings modal ---------- */
+function injectSettingsModal(){
+  if (document.getElementById('settingsModal')) return;
+  const c = getConfig();
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = `
+  <div class="modal-backdrop" id="settingsModal">
+    <div class="modal">
+      <button class="detail-close" id="cfgCancel">✕</button>
+      <h2>Unlock this Logbook</h2>
+      <p class="sub">${isDeployed() ? 'Enter the passphrase to connect this device.' : '<strong>This deployment has not been connected to a Google Sheet yet.</strong> Edit the SHEETS_URL constant in index.html and add.html first, then use Advanced setup below.'}</p>
+      <div class="field"><label for="cfgPassphrase">Passphrase</label>
+        <input type="text" id="cfgPassphrase" placeholder="your passphrase" autocomplete="off" value="${escapeHtml(c.lastPassphrase||'')}"></div>
+      <div class="modal-actions">
+        <button class="link-btn" id="toggleAdvanced" type="button">Advanced setup</button>
+        <button class="btn-primary" id="cfgUnlock">Unlock</button>
+      </div>
+      <div class="status-line" id="cfgStatus"></div>
+
+      <div id="advancedFields">
+        <p class="sub" style="margin-top:0;">For first-time setup, or to fix a broken connection. The App key must match the SECRET constant in your Apps Script.</p>
+        <div class="field"><label for="cfgAppKey">App key</label>
+          <input type="text" id="cfgAppKey" placeholder="matches SECRET in Code.gs" autocomplete="off"></div>
+        <p class="hint">Entering a passphrase above and clicking Save &amp; test will encrypt this key and publish it (encrypted) to the sheet, so any device can unlock with just the passphrase from then on.</p>
+        <div class="modal-actions" style="justify-content:flex-end;">
+          <button class="btn-secondary" id="cfgSave">Save &amp; test</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+  document.body.appendChild(wrapper);
+  document.getElementById('cfgCancel').addEventListener('click', closeSettings);
+  document.getElementById('settingsModal').addEventListener('click', (e)=>{ if (e.target.id==='settingsModal') closeSettings(); });
+  document.getElementById('toggleAdvanced').addEventListener('click', ()=>{
+    const el = document.getElementById('advancedFields');
+    el.style.display = el.style.display==='none' || !el.style.display ? 'block' : 'none';
+  });
+
+  document.getElementById('cfgUnlock').addEventListener('click', async ()=>{
+    const passphrase = document.getElementById('cfgPassphrase').value;
+    const statusEl = document.getElementById('cfgStatus');
+    if (!isDeployed()){ statusEl.textContent='SHEETS_URL is not set yet — edit the file first.'; statusEl.className='status-line err'; return; }
+    if (!passphrase){ statusEl.textContent='Enter your passphrase.'; statusEl.className='status-line err'; return; }
+    statusEl.textContent='Fetching…'; statusEl.className='status-line';
+    try {
+      const blob = await fetchSyncBlob();
+      statusEl.textContent='Decrypting…';
+      const cfg = await decryptConfig(blob, passphrase);
+      cfg.lastPassphrase = passphrase;
+      statusEl.textContent='Testing connection…';
+      await testConnection(cfg.appKey);
+      setConfig(cfg);
+      statusEl.textContent='Unlocked. You can close this now.';
+      statusEl.className='status-line ok';
+      window.dispatchEvent(new CustomEvent('logbook:configured'));
+    } catch(err){ statusEl.textContent=err.message; statusEl.className='status-line err'; }
+  });
+
+  document.getElementById('cfgSave').addEventListener('click', async ()=>{
+    const appKey = document.getElementById('cfgAppKey').value.trim();
+    const passphrase = document.getElementById('cfgPassphrase').value;
+    const statusEl = document.getElementById('cfgStatus');
+    if (!isDeployed()){ statusEl.textContent='SHEETS_URL is not set yet — edit the file first.'; statusEl.className='status-line err'; return; }
+    if (!appKey){ statusEl.textContent='App key is required — it must match SECRET in your Apps Script.'; statusEl.className='status-line err'; return; }
+    if (!passphrase || passphrase.length < MIN_PASSPHRASE_LEN){ statusEl.textContent=`Enter a passphrase of at least ${MIN_PASSPHRASE_LEN} characters.`; statusEl.className='status-line err'; return; }
+    statusEl.textContent='Testing connection…'; statusEl.className='status-line';
+    try {
+      await testConnection(appKey);
+      statusEl.textContent='Connected. Saving passphrase…';
+      const blob = await encryptConfig({ appKey }, passphrase);
+      await saveSyncBlob(blob, appKey);
+      setConfig({ appKey, lastPassphrase: passphrase });
+      statusEl.textContent='Set up complete. Other devices can now unlock with just this passphrase.';
+      statusEl.className='status-line ok';
+      window.dispatchEvent(new CustomEvent('logbook:configured'));
+    } catch(err){ statusEl.textContent=err.message; statusEl.className='status-line err'; }
+  });
+}
+function openSettings(){ injectSettingsModal(); document.getElementById('settingsModal').classList.add('open'); }
+function closeSettings(){ const m=document.getElementById('settingsModal'); if (m) m.classList.remove('open'); }
+
+/* ---------- detail modal: fully editable ---------- */
+function injectDetailModal(){
+  if (document.getElementById('detailModal')) return;
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = `
+  <div class="modal-backdrop" id="detailModal">
+    <div class="modal detail">
+      <button class="detail-close" id="detailClose">✕</button>
+      <span class="badge project" id="detailKindLabel" style="margin-bottom:8px; display:inline-block;"></span>
+
+      <div id="detailView">
+        <h2 id="detailViewTitle" style="margin-top:0;"></h2>
+        <div class="detail-meta" id="detailViewMeta"></div>
+        <div id="detailViewLinks"></div>
+        <p id="detailViewNotes" class="detail-notes-view"></p>
+      </div>
+
+      <div id="detailEdit" style="display:none;">
+        <div class="field"><label for="detailTitle">Title</label><input type="text" id="detailTitle"></div>
+        <div class="field-row">
+          <div class="field"><label for="detailDate">Date</label><input type="date" id="detailDate"></div>
+          <div class="field"><label for="detailPlace">Place</label><input type="text" id="detailPlace"></div>
+        </div>
+        <div class="field" id="detailPriorityField">
+          <label>Priority</label>
+          <div class="priority-toggle">
+            <label><input type="radio" name="detailPriority" value="normal"><span>Normal</span></label>
+            <label><input type="radio" name="detailPriority" value="high"><span>High</span></label>
+          </div>
+        </div>
+        <div class="field" id="detailLinksField">
+          <label>Links</label>
+          <div id="detailLinksList"></div>
+          <div class="add-link-row">
+            <input type="text" id="detailLinkLabel" placeholder="Label (optional)">
+            <input type="url" id="detailLinkUrl" placeholder="https://...">
+            <button type="button" class="btn-secondary" id="detailAddLink">Add</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="detailNotes">Notes</label>
+          <textarea id="detailNotes" rows="5" placeholder="Add detail…"></textarea>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" id="detailToggle"></button>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-danger" id="detailDelete">Delete</button>
+          <button class="btn-secondary" id="detailEditBtn">Edit</button>
+          <button class="btn-secondary" id="detailCancelBtn" style="display:none;">Cancel</button>
+          <button class="btn-primary" id="detailSave" style="display:none;">Save</button>
+        </div>
+      </div>
+      <div class="status-line" id="detailStatus"></div>
+    </div>
+  </div>`;
+  document.body.appendChild(wrapper);
+  document.getElementById('detailClose').addEventListener('click', closeDetail);
+  document.getElementById('detailModal').addEventListener('click', (e)=>{ if (e.target.id==='detailModal') closeDetail(); });
+}
+
+let DETAIL = { kind:null, id:null, links:[] };
+
+function renderDetailLinksEdit(){
+  const list = document.getElementById('detailLinksList');
+  list.innerHTML = '';
+  DETAIL.links.forEach((link, i) => {
+    const chip = document.createElement('span'); chip.className = 'link-chip';
+    const a = document.createElement('a'); a.className='open-link'; a.href = link.url; a.target='_blank'; a.rel='noopener';
+    a.textContent = link.label || link.url;
+    const rm = document.createElement('span'); rm.className='remove-link'; rm.textContent='✕';
+    rm.addEventListener('click', ()=>{ DETAIL.links.splice(i,1); renderDetailLinksEdit(); });
+    chip.appendChild(a); chip.appendChild(rm);
+    list.appendChild(chip);
+  });
+}
+
+function renderDetailLinksView(links){
+  const wrap = document.getElementById('detailViewLinks');
+  wrap.innerHTML = '';
+  (links||[]).forEach(link => {
+    const a = document.createElement('a'); a.className='link-chip'; a.style.textDecoration='none';
+    a.href = link.url; a.target='_blank'; a.rel='noopener';
+    a.innerHTML = `<span class="open-link">🔗 ${escapeHtml(link.label || link.url)}</span>`;
+    wrap.appendChild(a);
+  });
+}
+
+function setDetailMode(mode){
+  DETAIL.mode = mode;
+  document.getElementById('detailView').style.display = mode==='view' ? '' : 'none';
+  document.getElementById('detailEdit').style.display = mode==='edit' ? '' : 'none';
+  document.getElementById('detailEditBtn').style.display = mode==='view' ? '' : 'none';
+  document.getElementById('detailCancelBtn').style.display = mode==='edit' ? '' : 'none';
+  document.getElementById('detailSave').style.display = mode==='edit' ? '' : 'none';
+  document.getElementById('detailStatus').textContent = '';
+}
+
+function populateDetailFields(entity, kind){
+  document.getElementById('detailKindLabel').textContent = kind==='task' ? 'Task' : 'Project';
+
+  // view mode
+  document.getElementById('detailViewTitle').textContent = entity.title;
+  const meta = document.getElementById('detailViewMeta');
+  meta.innerHTML = '';
+  if (entity.date){ const b=document.createElement('span'); b.className='badge date'+(entity.date<todayISO()&&!entity.completed?' overdue':''); b.textContent=formatDayLabel(entity.date); meta.appendChild(b); }
+  if (entity.place){ const b=document.createElement('span'); b.className='badge place'; b.textContent='⚑ '+entity.place; meta.appendChild(b); }
+  if (kind==='task' && entity.priority==='high'){ const b=document.createElement('span'); b.className='badge priority'; b.textContent='high priority'; meta.appendChild(b); }
+  if (entity.completed){ const b=document.createElement('span'); b.className='badge'; b.textContent='done'; meta.appendChild(b); }
+  renderDetailLinksView(kind==='project' ? entity.links : null);
+  document.getElementById('detailViewNotes').textContent = entity.notes || '(no notes)';
+
+  // edit mode
+  document.getElementById('detailTitle').value = entity.title;
+  document.getElementById('detailDate').value = entity.date || '';
+  document.getElementById('detailPlace').value = entity.place || '';
+  document.getElementById('detailNotes').value = entity.notes || '';
+  document.getElementById('detailPriorityField').style.display = kind==='task' ? '' : 'none';
+  if (kind==='task'){
+    document.querySelectorAll('input[name="detailPriority"]').forEach(r => r.checked = (r.value === (entity.priority||'normal')));
+  }
+  document.getElementById('detailLinksField').style.display = kind==='project' ? '' : 'none';
+  DETAIL.links = kind==='project' ? JSON.parse(JSON.stringify(entity.links||[])) : [];
+  renderDetailLinksEdit();
+  document.getElementById('detailLinkLabel').value = '';
+  document.getElementById('detailLinkUrl').value = '';
+}
+
+function openDetail(kind, id){
+  injectDetailModal();
+  const entity = (kind==='task' ? STATE.tasks : STATE.projects).find(x=>x.id===id);
+  if (!entity) return;
+  DETAIL = { kind, id, links: [], mode:'view' };
+
+  populateDetailFields(entity, kind);
+  setDetailMode('view');
+
+  document.getElementById('detailAddLink').onclick = () => {
+    const url = document.getElementById('detailLinkUrl').value.trim();
+    if (!url) return;
+    const label = document.getElementById('detailLinkLabel').value.trim();
+    DETAIL.links.push({ label, url });
+    document.getElementById('detailLinkLabel').value = '';
+    document.getElementById('detailLinkUrl').value = '';
+    renderDetailLinksEdit();
+  };
+
+  const toggleBtn = document.getElementById('detailToggle');
+  toggleBtn.textContent = entity.completed ? 'Mark not done' : 'Mark done';
+  toggleBtn.onclick = async () => {
+    if (kind === 'task') await toggleTaskComplete(id); else await toggleProjectComplete(id);
+    openDetail(kind, id);
+  };
+
+  document.getElementById('detailDelete').onclick = async () => {
+    if (!confirm(`Delete "${entity.title}"?`)) return;
+    if (kind === 'task') await deleteTask(id); else await deleteProject(id);
+    closeDetail();
+  };
+
+  document.getElementById('detailEditBtn').onclick = () => setDetailMode('edit');
+
+  document.getElementById('detailCancelBtn').onclick = () => {
+    const current = (kind==='task' ? STATE.tasks : STATE.projects).find(x=>x.id===id);
+    if (current) populateDetailFields(current, kind);
+    setDetailMode('view');
+  };
+
+  document.getElementById('detailSave').onclick = async () => {
+    const statusEl = document.getElementById('detailStatus');
+    const title = document.getElementById('detailTitle').value.trim();
+    const date = document.getElementById('detailDate').value;
+    const place = document.getElementById('detailPlace').value.trim() || null;
+    const notes = document.getElementById('detailNotes').value;
+    if (!title){ statusEl.textContent='Title is required.'; statusEl.className='status-line err'; return; }
+    if (!date){ statusEl.textContent='Date is required.'; statusEl.className='status-line err'; return; }
+    statusEl.textContent='Saving…'; statusEl.className='status-line';
+    try {
+      if (kind === 'task'){
+        const priority = document.querySelector('input[name="detailPriority"]:checked').value;
+        await updateTask(id, { title, date, place, notes, priority });
+      } else {
+        await updateProject(id, { title, date, place, notes, links: DETAIL.links });
+      }
+      const fresh = (kind==='task' ? STATE.tasks : STATE.projects).find(x=>x.id===id);
+      if (fresh) populateDetailFields(fresh, kind);
+      setDetailMode('view');
+      showToast('Saved.');
+    } catch (err) { statusEl.textContent=err.message; statusEl.className='status-line err'; }
+  };
+
+  document.getElementById('detailModal').classList.add('open');
+}
+function closeDetail(){ const m=document.getElementById('detailModal'); if (m) m.classList.remove('open'); }
+
+/* ---------- local cache (durable, offline-safe copy of the data) ---------- */
+const CACHE_KEY = 'logbook_cache_v1';
+function getCache(){ try{ return JSON.parse(localStorage.getItem(CACHE_KEY)); }catch(e){ return null; } }
+function setCache(tasks, projects, dirty){
+  const existing = getCache();
+  localStorage.setItem(CACHE_KEY, JSON.stringify({
+    tasks, projects, cachedAt: Date.now(),
+    dirty: dirty !== undefined ? dirty : (existing ? existing.dirty : false)
+  }));
+}
+function dataEquals(a, b){
+  return JSON.stringify(a.tasks)===JSON.stringify(b.tasks) && JSON.stringify(a.projects)===JSON.stringify(b.projects);
+}
+
+/* ---------- sync status indicator ---------- */
+let SYNC_STATE = 'syncing'; // 'synced' | 'syncing' | 'offline'
+let LAST_SYNC_TIME = null;
+let RETRY_TIMER = null;
+let RETRYING = false;
+
+function setSyncState(state){
+  SYNC_STATE = state;
+  if (state === 'synced') LAST_SYNC_TIME = Date.now();
+  refreshSyncStatusDisplay();
+}
+function syncStatusText(){
+  if (SYNC_STATE==='syncing') return '🟡 Syncing…';
+  if (SYNC_STATE==='offline') return '🔴 Offline (showing cached data — your changes are saved locally and will sync automatically)';
+  if (SYNC_STATE==='synced'){
+    const secs = Math.floor((Date.now()-(LAST_SYNC_TIME||Date.now()))/1000);
+    if (secs<10) return '🟢 Synced just now';
+    if (secs<60) return `🟢 Synced ${secs}s ago`;
+    return `🟢 Synced ${Math.floor(secs/60)}m ago`;
+  }
+  return '';
+}
+function refreshSyncStatusDisplay(){ const el=document.getElementById('syncStatus'); if (el) el.textContent = syncStatusText(); }
+setInterval(()=>{ if (SYNC_STATE==='synced') refreshSyncStatusDisplay(); }, 15000);
+
+function scheduleRetry(){
+  clearTimeout(RETRY_TIMER);
+  RETRY_TIMER = setTimeout(()=>{ pushPendingChanges(); }, 15000);
+}
+window.addEventListener('online', ()=>{ const c=getCache(); if (c && c.dirty) pushPendingChanges(); });
+window.addEventListener('beforeunload', (e)=>{
+  const c = getCache();
+  if (c && c.dirty){ e.preventDefault(); e.returnValue = ''; }
+});
+
+/* ---------- skeleton loading ---------- */
+function renderSkeleton(){
+  const list = document.getElementById('mainList');
+  list.innerHTML = '';
+  for (let i=0;i<7;i++){ const sk=document.createElement('div'); sk.className='skeleton-card'; list.appendChild(sk); }
+}
+
+/* ---------- state & rendering ---------- */
+let STATE = { tasks:[], projects:[], filters:{ type:'all', status:'active', place:'', date:'', search:'' } };
+
+async function initApp(){
+  if (!isConfigured()){ renderUnconfigured(); return; }
+  const cache = getCache();
+  if (cache && (cache.tasks || cache.projects)){
+    STATE.tasks = cache.tasks || []; STATE.projects = cache.projects || [];
+    renderAll();
+    if (cache.dirty){
+      // Unsynced edits from a previous session — push those before pulling anything fresh,
+      // so a stale server read can never overwrite newer local changes.
+      setSyncState('syncing');
+      await pushPendingChanges();
+      return;
+    }
+  } else {
+    renderSkeleton();
+  }
+  await pullFromServer();
+}
+
+async function pullFromServer(){
+  setSyncState('syncing');
+  try {
+    const fresh = await loadData();
+    const current = { tasks: STATE.tasks, projects: STATE.projects };
+    if (!dataEquals(current, fresh)){
+      const scrollY = window.scrollY;
+      STATE.tasks = fresh.tasks; STATE.projects = fresh.projects;
+      renderAll();
+      requestAnimationFrame(()=>window.scrollTo(0, scrollY));
+    }
+    setCache(STATE.tasks, STATE.projects, false);
+    setSyncState('synced');
+  } catch (err) {
+    setSyncState('offline');
+    if (STATE.tasks.length===0 && STATE.projects.length===0){
+      document.getElementById('mainList').innerHTML = `<div class="loading-note">Couldn't load data: ${escapeHtml(err.message)}</div>`;
+    }
+  }
+}
+
+async function pushPendingChanges(){
+  if (RETRYING) return; RETRYING = true;
+  try {
+    await saveData(STATE.tasks, STATE.projects);
+    setCache(STATE.tasks, STATE.projects, false);
+    setSyncState('synced');
+  } catch (err) {
+    setSyncState('offline');
+    scheduleRetry();
+  } finally { RETRYING = false; }
+}
+
+function renderUnconfigured(){ document.getElementById('mainList').innerHTML = '<div class="loading-note">Connect this Logbook (gear icon above) to load your tasks.</div>'; }
+window.addEventListener('logbook:configured', ()=>initApp());
+
+// Every mutation is written to the durable local cache FIRST (marked dirty), then a save is
+// attempted. If the save fails — offline, Apps Script down, whatever — the change is never
+// lost: it stays in STATE and in localStorage, the status indicator turns red, and a retry
+// is scheduled automatically (and again the moment the browser comes back online).
+async function persist(){
+  setCache(STATE.tasks, STATE.projects, true);
+  setSyncState('syncing');
+  try {
+    await saveData(STATE.tasks, STATE.projects);
+    setCache(STATE.tasks, STATE.projects, false);
+    setSyncState('synced');
+    showToast('Saved.');
+  } catch (err) {
+    setSyncState('offline');
+    showToast('Saved locally — will sync automatically once back online.', true);
+    scheduleRetry();
+  }
+}
+
+async function toggleTaskComplete(id){
+  const t = STATE.tasks.find(x=>x.id===id); if (!t) return;
+  t.completed = !t.completed; t.completedAt = t.completed ? new Date().toISOString() : null;
+  renderAll(); await persist();
+}
+async function deleteTask(id){
+  STATE.tasks = STATE.tasks.filter(x=>x.id!==id);
+  renderAll(); await persist();
+}
+async function updateTask(id, fields){
+  STATE.tasks = STATE.tasks.map(t => t.id===id ? { ...t, ...fields } : t);
+  renderAll(); await persist();
+}
+async function toggleProjectComplete(id){
+  const p = STATE.projects.find(x=>x.id===id); if (!p) return;
+  p.completed = !p.completed; p.completedAt = p.completed ? new Date().toISOString() : null;
+  renderAll(); await persist();
+}
+async function deleteProject(id){
+  STATE.projects = STATE.projects.filter(x=>x.id!==id);
+  renderAll(); await persist();
+}
+async function updateProject(id, fields){
+  STATE.projects = STATE.projects.map(p => p.id===id ? { ...p, ...fields } : p);
+  renderAll(); await persist();
+}
+
+function combinedList(){
+  return STATE.tasks.map(t=>({kind:'task', entity:t})).concat(STATE.projects.map(p=>({kind:'project', entity:p})));
+}
+function passesFilters(kind, entity){
+  if (STATE.filters.type!=='all' && STATE.filters.type!==kind) return false;
+  if (STATE.filters.status==='active' && entity.completed) return false;
+  if (STATE.filters.status==='completed' && !entity.completed) return false;
+  if (STATE.filters.place && entity.place !== STATE.filters.place) return false;
+  if (STATE.filters.date && entity.date !== STATE.filters.date) return false;
+  if (STATE.filters.search){
+    const q = STATE.filters.search.toLowerCase();
+    const hay = (entity.title + ' ' + (entity.notes||'')).toLowerCase();
+    if (!hay.includes(q)) return false;
+  }
+  return true;
+}
+
+function renderAll(){ renderFilterBar(); renderList(); }
+
+function renderFilterBar(){
+  document.querySelectorAll('#typeFilter .pill-btn').forEach(b => b.classList.toggle('active', b.dataset.value===STATE.filters.type));
+  document.querySelectorAll('#statusFilter .pill-btn').forEach(b => b.classList.toggle('active', b.dataset.value===(STATE.filters.status==='allstatus'?'allstatus':STATE.filters.status)));
+  const select = document.getElementById('placeFilterSelect');
+  const places = [...new Set(STATE.tasks.filter(t=>t.place).map(t=>t.place).concat(STATE.projects.filter(p=>p.place).map(p=>p.place)))].sort();
+  const prev = select.value;
+  select.innerHTML = '<option value="">All places</option>' + places.map(p=>`<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
+  if (places.includes(prev)) select.value = prev;
+}
+
+function renderList(){
+  const list = document.getElementById('mainList');
+  list.innerHTML = '';
+  const today = todayISO();
+  const items = combinedList()
+    .filter(x => passesFilters(x.kind, x.entity))
+    .sort((a,b) => (a.entity.date||'').localeCompare(b.entity.date||'') || a.entity.title.localeCompare(b.entity.title));
+
+  if (items.length === 0){
+    list.innerHTML = '<div class="empty-note">Nothing here — add a task or project, or adjust the filters.</div>';
+    return;
+  }
+
+  let lastDate = null;
+  items.forEach(x => {
+    if (x.entity.date !== lastDate){
+      lastDate = x.entity.date;
+      const h = document.createElement('div');
+      h.className = 'section-label' + (lastDate < today ? ' warn' : '');
+      h.textContent = lastDate < today ? `${formatDayLabel(lastDate)} — overdue` : formatDayLabel(lastDate);
+      list.appendChild(h);
+    }
+    list.appendChild(entityCard(x.entity, x.kind, x.entity.date < today));
+  });
+}
+
+function entityCard(entity, kind, overdue){
+  const card = document.createElement('div'); card.className = 'task-card' + (entity.completed ? ' done' : '');
+  card.addEventListener('click', (e)=>{
+    if (e.target.closest('.check') || e.target.closest('.task-del')) return;
+    openDetail(kind, entity.id);
+  });
+
+  const check = document.createElement('div'); check.className = 'check' + (entity.completed?' checked':'');
+  check.textContent = entity.completed ? '✓' : ''; check.title = entity.completed ? 'Mark as not done' : 'Mark as done';
+  check.addEventListener('click', (e)=>{ e.stopPropagation(); kind==='task' ? toggleTaskComplete(entity.id) : toggleProjectComplete(entity.id); });
+
+  const body = document.createElement('div'); body.className='task-body';
+  const title = document.createElement('p'); title.className='task-title'; title.textContent=entity.title; body.appendChild(title);
+  const meta = document.createElement('div'); meta.className='task-meta';
+  if (kind==='project'){ const b=document.createElement('span'); b.className='badge project'; b.textContent='project'; meta.appendChild(b); }
+  if (entity.date){ const b=document.createElement('span'); b.className='badge date'+(overdue&&!entity.completed?' overdue':''); b.textContent=formatDayLabel(entity.date); meta.appendChild(b); }
+  if (entity.place){ const b=document.createElement('span'); b.className='badge place'; b.textContent='⚑ '+entity.place; meta.appendChild(b); }
+  if (entity.priority==='high'){ const b=document.createElement('span'); b.className='badge priority'; b.textContent='high'; meta.appendChild(b); }
+  body.appendChild(meta);
+
+  const del = document.createElement('button'); del.className='task-del'; del.textContent='✕'; del.title='Delete';
+  del.addEventListener('click', (e)=>{ e.stopPropagation();
+    if (!confirm(`Delete "${entity.title}"?`)) return;
+    kind==='task' ? deleteTask(entity.id) : deleteProject(entity.id);
+  });
+
+  card.appendChild(check); card.appendChild(body); card.appendChild(del);
+  return card;
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  injectSettingsModal();
+  injectDetailModal();
+  document.getElementById('settingsBtn').addEventListener('click', openSettings);
+  if (!isConfigured()) setTimeout(openSettings, 300);
+
+  document.querySelectorAll('#typeFilter .pill-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ STATE.filters.type = btn.dataset.value; renderAll(); });
+  });
+  document.querySelectorAll('#statusFilter .pill-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ STATE.filters.status = btn.dataset.value; renderAll(); });
+  });
+  document.getElementById('placeFilterSelect').addEventListener('change', (e)=>{ STATE.filters.place = e.target.value; renderList(); });
+  document.getElementById('dateFilterInput').addEventListener('change', (e)=>{ STATE.filters.date = e.target.value; renderList(); });
+  document.getElementById('dateFilterClear').addEventListener('click', ()=>{ STATE.filters.date = ''; document.getElementById('dateFilterInput').value = ''; renderList(); });
+  document.getElementById('searchInput').addEventListener('input', (e)=>{ STATE.filters.search = e.target.value; renderList(); });
+
+  document.getElementById('completedProjectsBtn').addEventListener('click', ()=>{
+    STATE.filters.type = 'project'; STATE.filters.status = 'completed';
+    renderAll();
+    window.scrollTo({ top: document.getElementById('mainList').offsetTop - 20, behavior:'smooth' });
+  });
+
+  initApp();
+});
+</script>
+</body>
+</html>
